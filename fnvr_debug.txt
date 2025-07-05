@@ -1,0 +1,31 @@
+; FNVR Debug Commands for Fallout New Vegas Console
+; Copy and paste these commands into the game console
+
+; Check connection status
+GetGlobalValue FNVRStatus
+
+; Check HMD position
+GetGlobalValue FNVRHMDX
+GetGlobalValue FNVRHMDY
+GetGlobalValue FNVRHMDZ
+
+; Check HMD rotation
+GetGlobalValue FNVRHMDPitch
+GetGlobalValue FNVRHMDYaw
+GetGlobalValue FNVRHMDRoll
+
+; Check Right Controller position
+GetGlobalValue FNVRRightX
+GetGlobalValue FNVRRightY
+GetGlobalValue FNVRRightZ
+
+; Check Right Controller rotation
+GetGlobalValue FNVRRightPitch
+GetGlobalValue FNVRRightYaw
+GetGlobalValue FNVRRightRoll
+
+; Set status manually (for testing)
+; SetGlobalValue FNVRStatus 1
+
+; Monitor all values in real-time (create a simple script)
+; You can create a quest script that prints these values periodically 

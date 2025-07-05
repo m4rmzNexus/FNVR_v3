@@ -1,0 +1,151 @@
+﻿<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+	<moduleName>NV Compatibility Skeleton</moduleName>
+	<moduleImage path="FOMOD\ScreenShot.JPG"/>
+	<moduleDependencies operator="Or">
+		<fileDependency file="FalloutNV.esm" state="Active"/>
+		<fileDependency file="FalloutNV.esm" state="Inactive"/>
+		<fileDependency file="Fallout3.esm" state="Active"/>
+		<fileDependency file="Fallout3.esm" state="Inactive"/>
+	</moduleDependencies>
+	<installSteps order="Explicit">
+		<installStep name="">
+			<optionalFileGroups order="Explicit">
+				<group name="Available Skeletons:" type="SelectExactlyOne">
+					<plugins order="Explicit">						
+						<plugin name="Default">
+							<description>
+Main file. Patched for:
+- Ragdolls
+- Xilandro's mods (Head Tracking, Quickthrow, Inertia, Bow, etc.)
+- One Man Army
+- Titans of the New West
+- FAFF ﻿(more in general facial expressions through idles)
+- BnB (more in general any armor or dress which is rigged with breast bones)
+- AlexScorpion Nightvision Googgles
+- High Heels﻿
+- Apollo v4+﻿ 
+- Vulpine Race (more in general rigged Tail﻿s)
+- Rigged genitals
+- DarianStephens' Jan/Feb 2021 update for B42 Inertia
+- Frontier
+- (optional) CBBE NV
+- Roberts for FO3
+- 360 Movement
+
+							</description>
+							<image path="FOMOD\Pics\Default.JPG"/>
+							<conditionFlags>
+								<flag name="SS">1</flag>
+							</conditionFlags>
+							<typeDescriptor>
+								<type name="Optional"/>
+							</typeDescriptor>
+						</plugin>
+						<plugin name="CBBE">
+							<description>
+Same as main file, made compatible with CBBE-NV. All credits to Darkaxt.
+
+If you use CBBE-NV, use this instead of the Main File
+							</description>
+							<image path="FOMOD\Pics\CBBE.JPG"/>
+							<conditionFlags>
+								<flag name="SS">2</flag>
+							</conditionFlags>
+							<typeDescriptor>
+								<type name="Optional"/>
+							</typeDescriptor>
+						</plugin>
+						<plugin name="Vanilla Weights">
+							<description>
+Same as a main file, but with vanilla weight for easier grab and dragging.
+							</description>
+							<image path="FOMOD\Pics\Vanilla.JPG"/>
+							<conditionFlags>
+								<flag name="SS">3</flag>
+							</conditionFlags>
+							<typeDescriptor>
+								<type name="Optional"/>
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+<!--				<group name="Optional:" type="SelectAny">
+					<plugins order="Explicit">						
+						<plugin name="Plugin">
+							<description>
+XXX
+							</description>
+							<image path="FOMOD\PScreenShot.JPG"/>
+							<conditionFlags>
+								<flag name="Pi">1</flag>
+							</conditionFlags>
+							<typeDescriptor>
+								<type name="Optional"/>
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group> -->
+				<group name="Support Files:" type="SelectAny">
+					<plugins order="Explicit">						
+						<plugin name="Mod Organizer">
+							<description>
+Installs a Meta.iNi file for Mod Organizer to allow versioning support. &#13;&#10;If you do not use Mod Organizer, you do not need to install this file.
+							</description>
+							<image path="FOMOD\Pics\MO.JPG"/>
+							<conditionFlags>
+								<flag name="MO">1</flag>
+							</conditionFlags>
+							<typeDescriptor>
+								<type name="Optional"/>
+							</typeDescriptor>
+						</plugin>
+					</plugins>
+				</group>
+			</optionalFileGroups>
+		</installStep>
+	</installSteps>
+	<conditionalFileInstalls>
+		<patterns>
+			<pattern> <!--01 Default, 1-->
+				<dependencies>
+					<flagDependency flag="SS" value="1"/>
+				</dependencies>
+				<files>
+					<folder source="01 Default" destination="" priority="1"/>
+				</files>
+			</pattern>
+			<pattern> <!--02 CBBE, 1-->
+				<dependencies>
+					<flagDependency flag="SS" value="2"/>
+				</dependencies>
+				<files>
+					<folder source="01 CBBE" destination="" priority="1"/>
+				</files>
+			</pattern>
+			<pattern> <!--03 Vanilla Weights, 1-->
+				<dependencies>
+					<flagDependency flag="SS" value="3"/>
+				</dependencies>
+				<files>
+					<folder source="01 Vanilla Weights" destination="" priority="1"/>
+				</files>
+			</pattern>
+			<pattern> <!--10 Plugin, 2-->
+				<dependencies>
+					<flagDependency flag="Pi" value="1"/>
+				</dependencies>
+				<files>
+					<folder source="10 Plugin" destination="" priority="2"/>
+				</files>
+			</pattern>
+			<pattern> <!--MO2, 3-->
+				<dependencies>
+					<flagDependency flag="MO" value="1"/>
+				</dependencies>
+				<files>
+					<file source="FOMOD\Meta.iNi" destination="meta.ini" priority="3"/>
+				</files>
+			</pattern>
+		</patterns>
+	</conditionalFileInstalls>
+</config>

@@ -1,0 +1,52 @@
+# Visual Studio
+.vs/
+*.VC.db
+*.VC.VC.opendb
+/x64/
+/Win32/
+/build/
+/build2/
+/Release/
+/Debug/
+*.suo
+*.user
+*.vcxproj.filters
+*.vcxproj.user
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+/venv/
+.venv/
+
+# Build artifacts
+*.o
+*.obj
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.pch
+*.dll
+*.exe
+*.so
+*.a
+
+# CMake
+/CMake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Misc
+*.log
+*.rar
+FNVR_3.code-workspace
+.DS_Store
+*~
+# Ignore legacy and problematic versions if not needed in the main repo
+/NewVersion_Problematic_Backup/
+/WorkingFNVR_Backup/ 

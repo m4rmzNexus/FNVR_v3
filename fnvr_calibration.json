@@ -1,0 +1,41 @@
+{
+    "position_multipliers": {
+        "x": 50.0,
+        "y": -50.0,
+        "z": -50.0
+    },
+    "position_offsets": {
+        "x": 15.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "rotation_multipliers": {
+        "x": -120.0,
+        "y": 0.0,
+        "z": 120.0
+    },
+    "rotation_offsets": {
+        "x": 10.0,
+        "y": 0.0,
+        "z": -75.0
+    },
+    "player_rotation": {
+        "multiplier": -150.0,
+        "offset": -7.5,
+        "use_hmd_rotation": true
+    },
+    "smoothing": {
+        "enabled": true,
+        "position_factor": 0.8,
+        "rotation_factor": 0.9
+    },
+    "dead_zones": {
+        "position": 0.001,
+        "rotation": 0.5
+    },
+    "calibration_gesture": {
+        "enabled": true,
+        "position": [0.0, -0.3, 0.2],
+        "threshold": 0.1
+    }
+}

@@ -1,0 +1,11 @@
+# Proje Yapısı ve Hedefler
+
+Bu proje, Fallout New Vegas için bir "Hafıza Bankası" modu geliştirmeyi amaçlamaktadır. [[memory:2257372]]
+
+## Ana Dizinler
+- `scripts/`: Oyun içinde çalışacak mod betikleri burada yer alacaktır.
+- `docs/`: Proje dokümantasyonu, tasarım notları ve diğer belgeler bu dizinde saklanacaktır.
+
+## Önemli Dosyalar
+- `[README.md](mdc:README.md)`: Projenin hedeflerini ve geliştirme sürecini yönlendirecek kritik soruları içerir. Modun yönünü belirlemek için bu dosyadaki soruların cevaplanması beklenmektedir.
+ 
