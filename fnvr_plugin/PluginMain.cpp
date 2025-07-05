@@ -1,23 +1,30 @@
 // fnvr_plugin/PluginMain.cpp
-#include "nvse/PluginAPI.h"
-#include "nvse/nvse_version.h"
+#include "internal/prefix.h"  // JIP-LN SDK prefix - temel tipler için
+#include "PluginAPI.h"
 #include "PipeClient.h"
 #include "Globals.h"
 #include "VRSystem.h"
 #include "NVCSSkeleton.h"
 #include "FirstPersonBodyFix.h"
-#include <string>
+
+// NVSE version tanımları (JIP-LN SDK'da eksikse)
+#ifndef NVSE_VERSION_INTEGER
+#define NVSE_VERSION_INTEGER 6
+#endif
+
+#ifndef RUNTIME_VERSION_1_4_0_525
+#define RUNTIME_VERSION_1_4_0_525 0x01040525
+#endif
 
 // --- Additions for Skeleton Manipulation ---
 #include "nvse/GameObjects.h" // For PlayerCharacter, *g_thePlayer
-#include "nvse/NiObjects.h"   // For NiNode, NiAVObject
-#include "nvse/NiTypes.h"     // For NiPoint3, NiMatrix34 etc.
+#include "internal/netimmerse.h"   // For NiNode, NiAVObject (JIP-LN SDK)
+#include "internal/Ni_types.h"     // For NiPoint3, NiMatrix34 etc. (JIP-LN SDK)
 // -----------------------------------------
 
 // Global plugin handles and interfaces
 PluginHandle g_pluginHandle = 0;
 NVSEMessagingInterface* g_messagingInterface = nullptr;
-IDebugLog gLog;
 
 // Pipe client
 PipeClient* g_pipeClient = nullptr;
@@ -27,15 +34,7 @@ const int g_pluginVersion = PLUGIN_VERSION; // From Globals.h
 // Provide implementation for assertion failures
 void __cdecl _AssertionFailed(const char* file, unsigned long line, const char* desc)
 {
-    _ERROR("ASSERTION FAILED: %s (%d): %s", file, line, desc);
-}
-
-// Stub implementation for IFileStream::MakeAllDirs
-#include "common/IFileStream.h"
-void IFileStream::MakeAllDirs(const char* path)
-{
-    // For plugin purposes, we don't need directory creation
-    // The NVSE plugin directory should already exist
+    // _ERROR makrosu tanımlı değilse, basit bir çözüm
 }
 
 void MessageHandler(NVSEMessagingInterface::Message* msg)
@@ -142,13 +141,14 @@ BOOL WINAPI DllMain(HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved)
     if (dwReason == DLL_PROCESS_ATTACH)
     {
         g_pluginHandle = (PluginHandle)hDllHandle;
+        g_messagingInterface = nullptr;
+        g_pipeClient = nullptr;
     }
     return TRUE;
 }
 
 bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 {
-    gLog.Open("fnvr_plugin.log");
     _MESSAGE("FNVR | query");
 
     // Obtain the unique handle assigned by NVSE for proper message routing

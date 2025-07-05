@@ -20,5 +20,7 @@ D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\containers.cpp;D:\FNVR_3\fnvr_pl
 D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\NiTypes.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\NiTypes.obj
 D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameProcess.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\GameProcess.obj
 D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameTasks.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\GameTasks.obj
+D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameTiles.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\GameTiles.obj
 D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common\IDebugLog.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\IDebugLog.obj
 D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common\ITypes.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\ITypes.obj
+D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameUI.cpp;D:\FNVR_3\fnvr_plugin\build\FNVRPlugin.dir\Release\GameUI.obj

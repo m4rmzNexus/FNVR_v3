@@ -87,17 +87,16 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /Zc:threadSafeInit- /EHa-</AdditionalOptions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /EHsc- /Gw /bigobj /FS</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ForcedIncludeFiles>D:/FNVR_3/fnvr_plugin/SDK/NVSE-6.3.10/nvse/nvse/prefix.h</ForcedIncludeFiles>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
@@ -105,22 +104,35 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR="Debug";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME="FNVRPlugin";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR="Debug";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR=\"Debug\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME=\"FNVRPlugin\";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR=\"Debug\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
       <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
+    <PostBuildEvent>
+      <Message>FNVR.dll D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/ konumuna kopyalandı</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/plugins/FNVR.dll" "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -138,16 +150,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /Zc:threadSafeInit- /EHa-</AdditionalOptions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /EHsc- /Gw /bigobj /FS</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ForcedIncludeFiles>D:/FNVR_3/fnvr_plugin/SDK/NVSE-6.3.10/nvse/nvse/prefix.h</ForcedIncludeFiles>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
@@ -155,24 +166,37 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR="Release";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME="FNVRPlugin";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR="Release";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR=\"Release\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME=\"FNVRPlugin\";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR=\"Release\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
       <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
+    <PostBuildEvent>
+      <Message>FNVR.dll D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/ konumuna kopyalandı</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/plugins/FNVR.dll" "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -190,16 +214,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /Zc:threadSafeInit- /EHa-</AdditionalOptions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /EHsc- /Gw /bigobj /FS</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ForcedIncludeFiles>D:/FNVR_3/fnvr_plugin/SDK/NVSE-6.3.10/nvse/nvse/prefix.h</ForcedIncludeFiles>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MinSpace</Optimization>
@@ -207,24 +230,37 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR="MinSizeRel";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME="FNVRPlugin";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR="MinSizeRel";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR=\"MinSizeRel\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME=\"FNVRPlugin\";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR=\"MinSizeRel\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
       <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
+    <PostBuildEvent>
+      <Message>FNVR.dll D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/ konumuna kopyalandı</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/plugins/FNVR.dll" "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -242,17 +278,16 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /Zc:threadSafeInit- /EHa-</AdditionalOptions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus /Zc:twoPhase- /EHsc- /Gw /bigobj /FS</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ForcedIncludeFiles>D:/FNVR_3/fnvr_plugin/SDK/NVSE-6.3.10/nvse/nvse/prefix.h</ForcedIncludeFiles>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MinimalRebuild></MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
@@ -260,22 +295,35 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR="RelWithDebInfo";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME="FNVRPlugin";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR="RelWithDebInfo";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;WIN32_LEAN_AND_MEAN;NOMINMAX;VC_EXTRALEAN;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;RUNTIME;RUNTIME_VERSION=0x040020D0;_MBCS;CMAKE_INTDIR=\"RelWithDebInfo\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_USRDLL;_WINDLL;_CRT_SECURE_NO_WARNINGS;PROJECT_NAME=\"FNVRPlugin\";_HAS_EXCEPTIONS=0;RUNTIME;EDITOR_RUNTIME=0;IS_ADDRESS_LIBRARY=0;IS_AE=0;NO_LAUNDER_CLASS_MEMBERS=0;CMAKE_INTDIR=\"RelWithDebInfo\";FNVRPlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse;D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\nvse;D:\FNVR_3\fnvr_plugin\SDK\JIP-LN-NVSE-main\internal;D:\FNVR_3\fnvr_plugin\SDK\JohnnyGuitarNVSE-5.00;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
       <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
+    <PostBuildEvent>
+      <Message>FNVR.dll D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/ konumuna kopyalandı</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/plugins/FNVR.dll" "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -355,24 +403,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="D:\FNVR_3\fnvr_plugin\VRSystem.cpp" />
     <ClCompile Include="D:\FNVR_3\fnvr_plugin\NVCSSkeleton.cpp" />
     <ClCompile Include="D:\FNVR_3\fnvr_plugin\FirstPersonBodyFix.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameAPI.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameForms.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameObjects.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameTypes.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameData.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameScript.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameRTTI.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameExtraData.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameBSExtraData.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\SafeWrite.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\Utilities.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\utility.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\containers.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\NiTypes.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameProcess.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\nvse\nvse\GameTasks.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common\IDebugLog.cpp" />
-    <ClCompile Include="D:\FNVR_3\fnvr_plugin\SDK\NVSE-6.3.10\common\ITypes.cpp" />
+    <ClCompile Include="D:\FNVR_3\fnvr_plugin\GameAPI.cpp" />
+    <ClInclude Include="D:\FNVR_3\fnvr_plugin\VRDataPacket.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -1,7 +1,12 @@
 // fnvr_plugin/PipeClient.cpp
+#include "internal/prefix.h"  // JIP-LN SDK prefix - temel tipler için
 #include "PipeClient.h"
 #include "FirstPersonBodyFix.h"
-#include "nvse/PluginAPI.h" // For _MESSAGE
+
+// Basit log makrosu
+#ifndef _MESSAGE
+#define _MESSAGE(fmt, ...) ((void)0)
+#endif
 
 PipeClient::PipeClient(const std::string& pipeName)
     : m_pipeName(pipeName), m_pipeHandle(INVALID_HANDLE_VALUE), m_isConnected(false) {}

@@ -1,12 +1,24 @@
+#include "internal/prefix.h"  // JIP-LN SDK prefix - temel tipler için
 #include "Globals.h"
 #include "VRSystem.h"
 #include "NVCSSkeleton.h"
-#include "nvse/PluginAPI.h" // For _MESSAGE
-#include "nvse/GameAPI.h" // For Console_Print
 #include "nvse/GameData.h"
-#include "nvse/ScriptUtils.h"
 #include <vector>
 #include <cmath>
+
+// JIP-LN SDK'da LookupFormByID tanımlı değilse
+#ifndef LookupFormByID
+TESForm* LookupFormByID(UInt32 formID) {
+    return ((TESForm*(__cdecl*)(UInt32))0x4839C0)(formID);
+}
+#endif
+
+// DataHandler::LookupModByName implementation
+namespace {
+    ModInfo* DataHandler_LookupModByName(DataHandler* dh, const char* modName) {
+        return ThisCall<ModInfo*>(0x46F1C0, dh, modName);
+    }
+}
 
 namespace TESGlobals
 {
@@ -84,7 +96,7 @@ namespace TESGlobals
     void InitGlobals()
     {
         // This function should be called from `kMessage_DeferredInit`
-        DataHandler* dataHandler = DataHandler::Get();
+        DataHandler* dataHandler = DataHandler::GetSingleton();
         if (!dataHandler) {
             _MESSAGE("FNVR | Error: Could not get DataHandler.");
             return;

@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.15)
 project(FNVRPlugin)
 
 # --- Platform Ayarı (32-bit zorunlu) ---
 set(CMAKE_GENERATOR_PLATFORM Win32)
 
 # --- Proje Yolları ---
-# NVSE SDK yolunu yeni NVSE-6.3.10 dizinine ayarla
-set(NVSE_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/SDK/NVSE-6.3.10)
+# Projenin stabil olması için JIP LN NVSE SDK'sı gereklidir.
+set(NVSE_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/SDK/JIP-LN-NVSE-main)
 
 # JohnnyGuitarNVSE ve JIP-LN-NVSE opsiyonel olarak aynı kalıyor
 set(JG_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/SDK/JohnnyGuitarNVSE-5.00)
@@ -15,40 +15,22 @@ set(JIP_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/SDK/JIP-LN-NVSE-main)
 # --- Derlenecek Kaynak Dosyaları ---
 # Önce hedefi oluşturmalıyız.
 add_library(${PROJECT_NAME} SHARED
-    # Bizim eklentimizin kendi kaynakları
+    # Sadece bu projenin kendi kaynak dosyaları derlenecek.
+    # JIP SDK dosyaları derlenmeyecek, sadece başlık dosyaları kullanılacak.
     PluginMain.cpp
     Globals.cpp
     PipeClient.cpp
     VRSystem.cpp
     NVCSSkeleton.cpp
     FirstPersonBodyFix.cpp
-
-    # NVSE Örnek Projesinden Gerekli Görülen Temel Kaynaklar
-    "${NVSE_SDK_PATH}/nvse/nvse/GameAPI.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameForms.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameObjects.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameTypes.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameData.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameScript.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/GameRTTI.cpp"    # For RTTI symbols
-    "${NVSE_SDK_PATH}/nvse/nvse/GameExtraData.cpp" # For GetExtraScript
-    "${NVSE_SDK_PATH}/nvse/nvse/GameBSExtraData.cpp" # For extra data handling
-    "${NVSE_SDK_PATH}/nvse/nvse/SafeWrite.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/Utilities.cpp"
-    "${NVSE_SDK_PATH}/nvse/nvse/utility.cpp"     # For Pool_Alloc, etc.
-    "${NVSE_SDK_PATH}/nvse/nvse/containers.cpp"  # For UnorderedMap
-    "${NVSE_SDK_PATH}/nvse/nvse/NiTypes.cpp"     # For Point3Distance
-    "${NVSE_SDK_PATH}/nvse/nvse/GameProcess.cpp" # For ModelLoader
-    "${NVSE_SDK_PATH}/nvse/nvse/GameTasks.cpp"   # For ModelLoader implementation
-    "${NVSE_SDK_PATH}/common/IDebugLog.cpp"      # For IDebugLog implementation
-    "${NVSE_SDK_PATH}/common/ITypes.cpp"         # For StrCompare, StrLen etc.
 )
 
 # --- Dahil Edilecek Klasör Yolları ---
+# Derleyiciye JIP SDK'sının başlık dosyalarını nerede bulacağını söylüyoruz.
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "${NVSE_SDK_PATH}"
+    "${NVSE_SDK_PATH}"  # JIP-LN SDK root
     "${NVSE_SDK_PATH}/nvse"
-    "${NVSE_SDK_PATH}/common"
+    "${NVSE_SDK_PATH}/internal"
 )
 
 # JohnnyGuitarNVSE ve JIP-LN-NVSE başlıklarını sadece dizin mevcutsa ekle
@@ -59,35 +41,44 @@ if(EXISTS "${JIP_SDK_PATH}")
     target_include_directories(${PROJECT_NAME} PRIVATE "${JIP_SDK_PATH}")
 endif()
 
-# --- Derleyici Ayarları ---
-# xNVSE örnek projesine uygun derleyici ayarları
+# --- JIP LN UYUMLULUK AYARLARI ---
+# JIP LN'in vcxproj dosyasından alınan, SDK'nın doğru derlenmesi için GEREKLİ olan ayarlar.
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    WIN32
+    _WINDOWS
+    _USRDLL
+    _WINDLL
+    _CRT_SECURE_NO_WARNINGS
+    PROJECT_NAME="${PROJECT_NAME}"
+    _HAS_EXCEPTIONS=0
+    RUNTIME
+    EDITOR_RUNTIME=0
+    IS_ADDRESS_LIBRARY=0
+    IS_AE=0
+    NO_LAUNDER_CLASS_MEMBERS=0
+)
+
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE 
-        "/std:c++20"                               # C++20 standardı (örnek proje stdcpplatest kullanıyor)
-        "/FI${NVSE_SDK_PATH}/nvse/nvse/prefix.h"  # Force include prefix.h
-        "/MP"                                      # Multi-processor compilation
-        "/MD$<$<CONFIG:Debug>:d>"                  # Multi-threaded DLL runtime (Debug'da MDd)
-        "/Zc:__cplusplus"                          # Correct __cplusplus macro
-        "/Zc:twoPhase-"                            # Disable two-phase name lookup
-        "/permissive"                              # Relaxed conformance mode (permissive- yerine)
-        "/Zc:threadSafeInit-"                      # Disable thread-safe statics
-        "/EHa-"                                    # Disable C++ exceptions
-        "/Gy"                                      # Enable function-level linking
+    # JIP'in kullandığı C++20 standardı ve diğer MSVC ayarları
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        /std:c++latest
+        /MP
+        /Zc:__cplusplus
+        /permissive-
+        /Zc:preprocessor
+        /Zc:twoPhase-
+        /EHsc-
+        /Gy
+        /Gw
+        /bigobj
+        /FS
+    )
+    # C4244 ve C4018 gibi yaygın uyarıları devre dışı bırak
+    add_compile_options(
+        -wd4244
+        -wd4018
     )
 endif()
-
-# Gerekli ön işlemci tanımları (xNVSE örnek projesinden)
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    WIN32_LEAN_AND_MEAN
-    NOMINMAX
-    VC_EXTRALEAN
-    _CRT_SECURE_NO_WARNINGS
-    _HAS_EXCEPTIONS=0
-    _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-    RUNTIME
-    RUNTIME_VERSION=0x040020D0                     # Örnek projeden alınan değer
-    _MBCS                                          # Multi-Byte Character Set
-)
 
 # --- Çıktı ve Kurulum Ayarları ---
 if(DEFINED ENV{FalloutNVPath})
@@ -118,4 +109,28 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # C++ standardını ayarla
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF) 
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Sadece kendi projemizin kaynak dosyalarını derle
+target_sources(${PROJECT_NAME} PRIVATE
+    PluginMain.cpp
+    Globals.cpp
+    PipeClient.cpp
+    VRSystem.cpp
+    NVCSSkeleton.cpp
+    FirstPersonBodyFix.cpp
+    # Header dosyalar
+    VRDataPacket.h
+)
+
+# Pre-compiled header şu an için devre dışı
+# target_precompile_headers(${PROJECT_NAME} PRIVATE fnvr_plugin_pch.h)
+
+# --- Post-Build Olayı ---
+# Derlenen DLL'i otomatik olarak oyunun NVSE eklenti klasörüne kopyala
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:${PROJECT_NAME}>"
+    "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/"
+    COMMENT "FNVR.dll D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins/ konumuna kopyalandı"
+) 

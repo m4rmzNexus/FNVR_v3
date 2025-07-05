@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include <string>
-#include "Globals.h" // For VRDataPacket
+#include "VRDataPacket.h" // For VRDataPacket
 
 class PipeClient
 {

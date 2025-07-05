@@ -1,8 +1,12 @@
+#include "internal/prefix.h"  // JIP-LN SDK prefix - temel tipler için
 #include "VRSystem.h"
-#include "nvse/PluginAPI.h"
 #include <fstream>
 #include <cmath>
-#include <Windows.h>
+
+// Basit log makrosu
+#ifndef _MESSAGE
+#define _MESSAGE(fmt, ...) ((void)0)
+#endif
 
 namespace FNVR {
 

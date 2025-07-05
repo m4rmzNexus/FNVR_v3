@@ -1,6 +1,11 @@
+#include "internal/prefix.h"  // JIP-LN SDK prefix - temel tipler için
 #include "NVCSSkeleton.h"
-#include "nvse/PluginAPI.h"
 #include <cmath>
+
+// Basit log makrosu
+#ifndef _MESSAGE
+#define _MESSAGE(fmt, ...) ((void)0)
+#endif
 
 namespace FNVR {
 
