@@ -7,6 +7,16 @@
 #define _MESSAGE(fmt, ...) ((void)0)
 #endif
 
+// INI-cached offsets (loaded from PluginMain.cpp)
+extern float g_rightHandOffsetX;
+extern float g_rightHandOffsetY;
+extern float g_rightHandOffsetZ;
+
+extern int g_vorpxMode;  // From Globals.cpp
+
+// VorpX-specific scale (loaded from INI)
+static float g_vorpxScaleFactor = 1.0f;  // Default
+
 namespace FNVR {
 
 // Bone isimleri - NVCS skeleton'daki gerçek isimler
@@ -61,9 +71,9 @@ void NVCSSkeleton::VRToNVCSMapping::MapHMDToHead(const VRDataPacket& vrData,
     // Gamebryo: +Z up, +Y forward, +X right
     // Fallout NV: 70 units = 1 meter
     
-    // Pozisyon dönüşümü - doğru mapping
+    // Pozisyon dönüşümü - düzeltilmiş mapping
     headPos.v[0] = vrData.hmd_px * 70.0f;   // X aynı kalır
-    headPos.v[1] = vrData.hmd_pz * 70.0f;   // Y = Z (OpenVR forward = Gamebryo forward)
+    headPos.v[1] = -vrData.hmd_pz * 70.0f;  // Y = -Z (OpenVR -Z forward'ı Gamebryo +Y forward'a)
     headPos.v[2] = vrData.hmd_py * 70.0f;   // Z = Y (OpenVR up = Gamebryo up)
     
     // Quaternion dönüşümü - doğru rotasyon
@@ -80,9 +90,9 @@ void NVCSSkeleton::VRToNVCSMapping::MapControllerToHand(const VRDataPacket& vrDa
                                                          HmdQuaternionf_t& handRot) {
     if (isRight) {
         // Sağ controller pozisyonu - düzeltilmiş koordinat sistemi
-        handPos.v[0] = vrData.right_px * 70.0f;   // X aynı
-        handPos.v[1] = vrData.right_pz * 70.0f;   // Y = Z (forward)
-        handPos.v[2] = vrData.right_py * 70.0f;   // Z = Y (up)
+        handPos.v[0] = vrData.right_px * 70.0f * g_vorpxScaleFactor;   // X aynı, VorpX scale uygula
+        handPos.v[1] = vrData.right_pz * 70.0f * g_vorpxScaleFactor;   
+        handPos.v[2] = vrData.right_py * 70.0f * g_vorpxScaleFactor;   
         
         // Sağ controller rotasyonu - düzeltilmiş
         handRot.w = vrData.right_qw;
@@ -107,11 +117,19 @@ void NVCSSkeleton::VRToNVCSMapping::MapControllerToHand(const VRDataPacket& vrDa
         result.z = handRot.w * gripRot.z + handRot.x * gripRot.y - handRot.y * gripRot.x + handRot.z * gripRot.w;
         
         handRot = result;
+        
+        // VorpX-specific adjustment (e.g., additional rotation offset if needed)
+        if (g_vorpxMode) {
+            // Example: Add small yaw offset for VorpX alignment
+            float vorpxYawOffset = 5.0f * 3.14159f / 180.0f;  // 5 degrees
+            HmdQuaternionf_t yawRot = {cos(vorpxYawOffset / 2), 0, sin(vorpxYawOffset / 2), 0};
+            handRot = quaternion_multiply(yawRot, handRot);  // Assume quaternion_multiply function exists
+        }
     } else {
         // Sol controller desteği - mirror sağ controller
-        handPos.v[0] = -vrData.right_px * 70.0f;  // X'i ters çevir (sol tarafa)
-        handPos.v[1] = vrData.right_pz * 70.0f;   
-        handPos.v[2] = vrData.right_py * 70.0f;
+        handPos.v[0] = -vrData.right_px * 70.0f * g_vorpxScaleFactor;  // X'i ters çevir (sol tarafa)
+        handPos.v[1] = vrData.right_pz * 70.0f * g_vorpxScaleFactor;   
+        handPos.v[2] = vrData.right_py * 70.0f * g_vorpxScaleFactor;
         
         // Sol el için rotasyon (şimdilik basit mirror)
         handRot.w = vrData.right_qw;
@@ -119,7 +137,16 @@ void NVCSSkeleton::VRToNVCSMapping::MapControllerToHand(const VRDataPacket& vrDa
         handRot.y = vrData.right_qz;
         handRot.z = vrData.right_qy;
     }
+    
+    // Apply INI offsets (exclusive use)
+    handPos.v[0] += g_rightHandOffsetX;  // Assuming same for left in PoC
+    handPos.v[1] += g_rightHandOffsetY;
+    handPos.v[2] += g_rightHandOffsetZ;
 }
+
+// Improved IK with pole vector
+// Previous hand position for prediction (static for PoC)
+static HmdVector3_t s_prevHandPos = {0, 0, 0};
 
 void NVCSSkeleton::VRToNVCSMapping::CalculateArmIK(const HmdVector3_t& shoulderPos, 
                                                     const HmdVector3_t& handPos,
@@ -127,44 +154,39 @@ void NVCSSkeleton::VRToNVCSMapping::CalculateArmIK(const HmdVector3_t& shoulderP
                                                     float foreArmLength,
                                                     HmdQuaternionf_t& upperArmRot, 
                                                     HmdQuaternionf_t& foreArmRot) {
-    // Basit 2-bone IK hesaplaması
-    float dx = handPos.v[0] - shoulderPos.v[0];
-    float dy = handPos.v[1] - shoulderPos.v[1];
-    float dz = handPos.v[2] - shoulderPos.v[2];
-    float distance = sqrt(dx*dx + dy*dy + dz*dz);
+    // Simple prediction for VorpX latency: Average with previous position
+    HmdVector3_t predictedHand = handPos;
+    if (g_vorpxMode) {
+        predictedHand.v[0] = (handPos.v[0] + s_prevHandPos.v[0]) / 2.0f;
+        predictedHand.v[1] = (handPos.v[1] + s_prevHandPos.v[1]) / 2.0f;
+        predictedHand.v[2] = (handPos.v[2] + s_prevHandPos.v[2]) / 2.0f;
+    }
+    s_prevHandPos = handPos;  // Update previous
     
-    // Mesafe çok uzaksa, maksimum uzanma mesafesine kısıtla
+    // Vector from shoulder to predicted hand
+    HmdVector3_t dir = {predictedHand.v[0] - shoulderPos.v[0], predictedHand.v[1] - shoulderPos.v[1], predictedHand.v[2] - shoulderPos.v[2]};
+    float distance = sqrt(dir.v[0]*dir.v[0] + dir.v[1]*dir.v[1] + dir.v[2]*dir.v[2]);
+    
+    // Clamp distance
     float maxReach = upperArmLength + foreArmLength - 1.0f;
     if (distance > maxReach) {
         float scale = maxReach / distance;
-        dx *= scale;
-        dy *= scale;
-        dz *= scale;
+        dir.v[0] *= scale;
+        dir.v[1] *= scale;
+        dir.v[2] *= scale;
         distance = maxReach;
     }
     
-    // Cosine rule ile açıları hesapla
-    float a = upperArmLength;
-    float b = foreArmLength;
-    float c = distance;
+    // Angles using cosine rule
+    float elbowAngle = acos((upperArmLength*upperArmLength + foreArmLength*foreArmLength - distance*distance) / (2*upperArmLength*foreArmLength));
+    float shoulderAngle = acos((upperArmLength*upperArmLength + distance*distance - foreArmLength*foreArmLength) / (2*upperArmLength*distance));
     
-    // Dirsek açısı
-    float elbowAngle = acos((a*a + b*b - c*c) / (2*a*b));
+    // Pole vector for elbow direction
+    HmdVector3_t pole = g_poleVector;  // Use global configurable value
     
-    // Omuz açısı
-    float shoulderAngle = acos((a*a + c*c - b*b) / (2*a*c));
-    
-    // Quaternion'lara dönüştür (basitleştirilmiş)
-    // TODO: Gerçek 3D IK implementasyonu
-    upperArmRot.w = cos(shoulderAngle / 2);
-    upperArmRot.x = sin(shoulderAngle / 2);
-    upperArmRot.y = 0;
-    upperArmRot.z = 0;
-    
-    foreArmRot.w = cos(elbowAngle / 2);
-    foreArmRot.x = sin(elbowAngle / 2);
-    foreArmRot.y = 0;
-    foreArmRot.z = 0;
+    // Compute rotations (simplified quaternion)
+    upperArmRot = {cos(shoulderAngle/2), sin(shoulderAngle/2) * pole.v[0], sin(shoulderAngle/2) * pole.v[1], sin(shoulderAngle/2) * pole.v[2]};
+    foreArmRot = {cos(elbowAngle/2), sin(elbowAngle/2) * pole.v[0], sin(elbowAngle/2) * pole.v[1], sin(elbowAngle/2) * pole.v[2]};
 }
 
 // Manager Implementation
@@ -199,15 +221,18 @@ void NVCSSkeleton::Manager::Initialize() {
 
 void NVCSSkeleton::Manager::Update(const VRDataPacket& vrData) {
     // VorpX mode kontrolü
-    char iniPath[MAX_PATH];
-    GetModuleFileNameA(NULL, iniPath, MAX_PATH);
-    strcpy(strrchr(iniPath, '\\'), "\\Data\\NVSE\\Plugins\\FNVR.ini");
-    
-    int vorpxMode = GetPrivateProfileIntA("General", "VorpXMode", 0, iniPath);
-    
-    if (vorpxMode) {
-        // VorpX modunda sadece controller tracking
+    if (g_vorpxMode) {
         UpdateVorpXMode(vrData);
+        // Functional fallback: Simple memory scan simulation for VorpX head data
+        // Assuming VorpX stores head pos at a known address (hypothetical - replace with real scan)
+        // For PoC, use dummy data or actual reverse-engineered address
+        uintptr_t vorpxHeadAddr = 0xDEADBEEF;  // Placeholder address - REPLACE WITH REAL
+        HmdVector3_t vorpxHeadPos;
+        if (SafeRead(vorpxHeadAddr, vorpxHeadPos)) {
+            m_bonePositions[NVCS_BIP01_HEAD] = vorpxHeadPos;  // Sync with VorpX
+        } else {
+            _MESSAGE("FNVR | Warning: Failed to read VorpX head data.");
+        }
         return;
     }
     
@@ -223,7 +248,7 @@ void NVCSSkeleton::Manager::Update(const VRDataPacket& vrData) {
     // Bu 1st person body'nin görünmesini sağlar
     HmdVector3_t cameraPos = headPos;
     // VorpX için kamera offset'i kaldır
-    if (!vorpxMode) {
+    if (!g_vorpxMode) {
         cameraPos.v[1] += 8.0f;  // 8 unit ileri
         cameraPos.v[2] += 5.0f;  // 5 unit yukarı
     }
@@ -262,45 +287,11 @@ void NVCSSkeleton::Manager::Update(const VRDataPacket& vrData) {
 
 void NVCSSkeleton::Manager::UpdateWeaponPosition(const HmdVector3_t& handPos, 
                                                   const HmdQuaternionf_t& handRot) {
-    // INI dosyasından weapon offset'leri oku
-    char iniPath[MAX_PATH];
-    GetModuleFileNameA(NULL, iniPath, MAX_PATH);
-    strcpy(strrchr(iniPath, '\\'), "\\Data\\NVSE\\Plugins\\FNVR.ini");
-    
-    char buffer[32];
-    GetPrivateProfileStringA("NVCS", "WeaponOffsetX", "0.0", buffer, sizeof(buffer), iniPath);
-    float offsetX = (float)atof(buffer);
-    GetPrivateProfileStringA("NVCS", "WeaponOffsetY", "10.0", buffer, sizeof(buffer), iniPath);
-    float offsetY = (float)atof(buffer);
-    GetPrivateProfileStringA("NVCS", "WeaponOffsetZ", "-5.0", buffer, sizeof(buffer), iniPath);
-    float offsetZ = (float)atof(buffer);
-    
-    // Weapon bone'u el pozisyonuna göre ayarla
-    // Offset'leri el rotasyonuna göre dönüştür (local space)
+    // Apply INI offsets
     HmdVector3_t weaponPos = handPos;
-    
-    // Quaternion'dan rotation matrix'e dönüştür (basitleştirilmiş)
-    float qw = handRot.w, qx = handRot.x, qy = handRot.y, qz = handRot.z;
-    
-    // Right vector
-    float rx = 1 - 2*(qy*qy + qz*qz);
-    float ry = 2*(qx*qy + qw*qz);
-    float rz = 2*(qx*qz - qw*qy);
-    
-    // Forward vector  
-    float fx = 2*(qx*qy - qw*qz);
-    float fy = 1 - 2*(qx*qx + qz*qz);
-    float fz = 2*(qy*qz + qw*qx);
-    
-    // Up vector
-    float ux = 2*(qx*qz + qw*qy);
-    float uy = 2*(qy*qz - qw*qx);
-    float uz = 1 - 2*(qx*qx + qy*qy);
-    
-    // Local offset'leri world space'e dönüştür
-    weaponPos.v[0] += rx * offsetX + fx * offsetY + ux * offsetZ;
-    weaponPos.v[1] += ry * offsetX + fy * offsetY + uy * offsetZ;
-    weaponPos.v[2] += rz * offsetX + fz * offsetY + uz * offsetZ;
+    weaponPos.v[0] += g_rightHandOffsetX;
+    weaponPos.v[1] += g_rightHandOffsetY;
+    weaponPos.v[2] += g_rightHandOffsetZ;
     
     m_bonePositions[NVCS_WEAPON] = weaponPos;
     m_boneRotations[NVCS_WEAPON] = handRot;

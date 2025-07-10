@@ -77,15 +77,26 @@ class RawPosePipe:
         return True
 
     def send_pose(self, hmd_q, hmd_p, ctl_q, ctl_p, rel_p, timestamp):
-        # Packet: version (I), hmd_q (4f), hmd_p (3f), ctl_q (4f), ctl_p (3f), rel_p (3f), timestamp (d)
+        # New unified packet format with flags
+        # Base packet: version (I), flags (I), hmd_q (4f), hmd_p (3f), ctl_q (4f), ctl_p (3f), rel_p (3f), timestamp (d)
+        # Total: 88 bytes (4+4+16+12+16+12+12+8)
+        
+        # For now, only send basic data (no left controller, no inputs)
+        flags = 0x01  # VR_FLAG_BASIC_DATA
+        
         packet = struct.pack(
-            '<I4f3f4f3f3fd',
+            '<II4f3f4f3f3fd',
             2,                # version
+            flags,            # flags (basic data only)
             *hmd_q, *hmd_p,   # HMD quaternion, position
-            *ctl_q, *ctl_p,   # Controller quaternion, position
+            *ctl_q, *ctl_p,   # Right controller quaternion, position
             *rel_p,           # Controller pos relative to HMD (meters)
             timestamp         # Timestamp (seconds since epoch)
         )
+        # Debug: Print packet size on first send
+        if not hasattr(self, '_first_packet_logged'):
+            print(f"Sending packet size: {len(packet)} bytes")
+            self._first_packet_logged = True
         bytes_written = ctypes.c_ulong()
         success = self.kernel32.WriteFile(
             self.pipe_handle, packet, len(packet),
@@ -129,6 +140,15 @@ class RawPosePipe:
                     if device_class == openvr.TrackedDeviceClass_Controller:
                         right_controller_index = device_index
                         break
+        # Setup dummy data for when controller is not found
+        dummy_ctl_q = (1.0, 0.0, 0.0, 0.0)  # Identity quaternion
+        dummy_ctl_p = (0.0, 0.0, 0.0)       # Origin position
+        dummy_rel_p = (0.0, 0.0, 0.0)       # No relative position
+        
+        print(f"Controller index: {right_controller_index}")
+        if right_controller_index is None:
+            print("WARNING: No controller found! Using dummy data.")
+        
         while True:
             if not self.pipe_handle:
                 if not self.create_pipe_and_wait():
@@ -137,22 +157,40 @@ class RawPosePipe:
             returned_poses = self.vr_system.getDeviceToAbsoluteTrackingPose(
                 openvr.TrackingUniverseStanding, 0.0, poses_array
             )
-            if len(returned_poses) > hmd_index and len(returned_poses) > right_controller_index:
+            
+            if len(returned_poses) > hmd_index:
                 hmd_pose = returned_poses[hmd_index]
-                ctl_pose = returned_poses[right_controller_index]
-                if hmd_pose.bPoseIsValid and ctl_pose.bPoseIsValid:
+                
+                if hmd_pose.bPoseIsValid:
                     m = hmd_pose.mDeviceToAbsoluteTracking
-                    n = ctl_pose.mDeviceToAbsoluteTracking
                     hmd_q = get_quaternion(m)
                     hmd_p = get_position(m)
-                    ctl_q = get_quaternion(n)
-                    ctl_p = get_position(n)
-                    # Controller pos relative to HMD (in HMD space)
-                    world_diff = (ctl_p[0] - hmd_p[0], ctl_p[1] - hmd_p[1], ctl_p[2] - hmd_p[2])
-                    hmd_q_conj = quaternion_conjugate(hmd_q)
-                    rel_p = rotate_vector_by_quaternion(world_diff, hmd_q_conj)
+                    
+                    # Check if we have a controller and it's valid
+                    if right_controller_index is not None and len(returned_poses) > right_controller_index:
+                        ctl_pose = returned_poses[right_controller_index]
+                        if ctl_pose.bPoseIsValid:
+                            n = ctl_pose.mDeviceToAbsoluteTracking
+                            ctl_q = get_quaternion(n)
+                            ctl_p = get_position(n)
+                            # Controller pos relative to HMD (in HMD space)
+                            world_diff = (ctl_p[0] - hmd_p[0], ctl_p[1] - hmd_p[1], ctl_p[2] - hmd_p[2])
+                            hmd_q_conj = quaternion_conjugate(hmd_q)
+                            rel_p = rotate_vector_by_quaternion(world_diff, hmd_q_conj)
+                        else:
+                            # Controller not tracking
+                            ctl_q = dummy_ctl_q
+                            ctl_p = dummy_ctl_p
+                            rel_p = dummy_rel_p
+                    else:
+                        # No controller
+                        ctl_q = dummy_ctl_q
+                        ctl_p = dummy_ctl_p
+                        rel_p = dummy_rel_p
+                    
                     timestamp = time.time()
                     self.send_pose(hmd_q, hmd_p, ctl_q, ctl_p, rel_p, timestamp)
+                    
             time.sleep(1.0/120.0)  # 120 Hz update
 
 if __name__ == "__main__":

@@ -6,7 +6,13 @@
 #include "VRDataPacket.h"   // VRDataPacket tanımı
 
 // Helper macro to simplify null checks. Can be used anywhere Globals.h is included.
-#define SAFE_SET_VALUE(global, value) if (global) { global->data = value; }
+// JIP-LN SDK: TESGlobal type check için typeID kullanıyoruz
+#define SAFE_SET_VALUE(global, value) \
+    do { \
+        if (global && global->refID) { \
+            global->data = value; \
+        } \
+    } while(0)
 
 // Basit log makrosu - JIP-LN SDK'da _MESSAGE tanımlı değilse
 #ifndef _MESSAGE

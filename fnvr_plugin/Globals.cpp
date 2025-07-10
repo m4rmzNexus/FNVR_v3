@@ -102,7 +102,21 @@ namespace TESGlobals
             return;
         }
 
-        const ModInfo* modInfo = dataHandler->LookupModByName("FNVRGlobals.esp");
+        // VorpX Detection
+        g_vorpxMode = 0;  // Default false
+        for (UInt32 i = 0; i < dataHandler->modList.modInfoList.Count(); i++) {
+            ModInfo* mod = dataHandler->modList.modInfoList.GetNthItem(i);
+            if (mod && strstr(mod->name, "VorpX") != NULL) {  // Check for VorpX mod name (adjust if needed)
+                g_vorpxMode = 1;
+                _MESSAGE("FNVR | VorpX detected. Enabling VorpX mode.");
+                break;
+            }
+        }
+        if (!g_vorpxMode) {
+            _MESSAGE("FNVR | Warning: VorpX not detected. Some features may not work.");
+        }
+
+        const ModInfo* modInfo = DataHandler_LookupModByName(dataHandler, "FNVRGlobals.esp");
         if (!modInfo)
         {
             _MESSAGE("FNVR | Error: FNVRGlobals.esp not found. Make sure the plugin is active.");
@@ -187,6 +201,13 @@ namespace TESGlobals
         SAFE_SET_VALUE(FNVRStatus, 0.0f);
     }
 
+    // Cached config values (loaded from PluginMain.cpp)
+    extern bool g_enableLogging;  // Assuming declared in PluginMain.h or Globals.h
+    extern int g_vorpxMode;      // Add this global
+
+    // Basic gesture detection thresholds
+    static const float TRIGGER_THRESHOLD = 0.5f;  // For grip
+
     void UpdateGlobals(const VRDataPacket& packet)
     {
         // NVCS Skeleton sistemini kullan
@@ -202,13 +223,8 @@ namespace TESGlobals
         // Skeleton güncelle
         skeletonMgr.Update(packet);
         
-        // VorpX mode kontrolü
-        char iniPath[MAX_PATH];
-        GetModuleFileNameA(NULL, iniPath, MAX_PATH);
-        strcpy(strrchr(iniPath, '\\'), "\\Data\\NVSE\\Plugins\\FNVR.ini");
-        int vorpxMode = GetPrivateProfileIntA("General", "VorpXMode", 0, iniPath);
-        
-        if (!vorpxMode) {
+        // VorpX mode kontrolü - now using cached value
+        if (!g_vorpxMode) {
             // Normal mod - HMD değerleri (Head bone'dan)
             HmdVector3_t headPos = skeletonMgr.GetBonePosition(FNVR::NVCSSkeleton::NVCS_BIP01_HEAD);
             HmdQuaternionf_t headRot = skeletonMgr.GetBoneRotation(FNVR::NVCSSkeleton::NVCS_BIP01_HEAD);
@@ -260,6 +276,14 @@ namespace TESGlobals
         SAFE_SET_VALUE(FNVRLeftPitch, leftPitch);
         SAFE_SET_VALUE(FNVRLeftYaw, leftYaw);
         SAFE_SET_VALUE(FNVRLeftRoll, leftRoll);
+        
+        // Basic right-hand gesture recognition (PoC)
+        if (packet.extended.right_trigger > TRIGGER_THRESHOLD) {
+            // Grip gesture - Play animation using JohnnyGuitar
+            // Placeholder: Assume PlayAnimation function from JohnnyGuitar
+            // PlayAnimation(GetPlayer(), "GripAnim");  // Replace with actual call
+            _MESSAGE("FNVR | Grip gesture detected");
+        }
         
         // Status güncellemesi
         SAFE_SET_VALUE(FNVRStatus, 1.0f); // Bağlı

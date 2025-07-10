@@ -49,4 +49,7 @@ FNVR_3.code-workspace
 *~
 # Ignore legacy and problematic versions if not needed in the main repo
 /NewVersion_Problematic_Backup/
-/WorkingFNVR_Backup/ 
+/WorkingFNVR_Backup/
+
+# Archive directory
+/archive/ 

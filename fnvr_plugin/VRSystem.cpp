@@ -203,12 +203,12 @@ void VRManager::Update(const VRDataPacket& packet) {
     }
     
     // HMD verilerini dönüştür
-    HmdVector3_t hmdPosVR = {packet.hmd_px, packet.hmd_py, packet.hmd_pz};
+    HmdVector3_t hmdPosVR = {packet.hmd.px, packet.hmd.py, packet.hmd.pz};
     HmdVector3_t hmdPosGame;
     ConvertOpenVRToGamebryo(hmdPosVR, hmdPosGame);
     
     // Controller verilerini dönüştür
-    HmdVector3_t rightPosVR = {packet.right_px, packet.right_py, packet.right_pz};
+    HmdVector3_t rightPosVR = {packet.rightController.px, packet.rightController.py, packet.rightController.pz};
     HmdVector3_t rightPosGame;
     ConvertOpenVRToGamebryo(rightPosVR, rightPosGame);
     
@@ -240,7 +240,7 @@ void VRManager::Update(const VRDataPacket& packet) {
     
     // Rotasyon verilerini güncelle
     float pitch, yaw, roll;
-    TESGlobals::QuaternionToEuler(packet.right_qw, packet.right_qx, packet.right_qy, packet.right_qz, pitch, yaw, roll);
+    TESGlobals::QuaternionToEuler(packet.rightController.qw, packet.rightController.qx, packet.rightController.qy, packet.rightController.qz, pitch, yaw, roll);
     
     // Silah rotasyonunu uygula
     pitch += config.weapon.gripPitch;
@@ -352,18 +352,18 @@ void VRManager::StartCalibration() {
 void VRManager::UpdateCalibration(const VRDataPacket& packet) {
     // HMD yüksekliğini kaydet
     if (calibration.standingHeight == 0.0f) {
-        calibration.standingHeight = packet.hmd_py;
+        calibration.standingHeight = packet.hmd.py;
         _MESSAGE("FNVR | Calibration: Standing height = %.2f meters", calibration.standingHeight);
     }
     
     // Controller pozisyonlarını kaydet
-    calibration.hmdCalibrationPose.m[0][3] = packet.hmd_px;
-    calibration.hmdCalibrationPose.m[1][3] = packet.hmd_py;
-    calibration.hmdCalibrationPose.m[2][3] = packet.hmd_pz;
+    calibration.hmdCalibrationPose.m[0][3] = packet.hmd.px;
+    calibration.hmdCalibrationPose.m[1][3] = packet.hmd.py;
+    calibration.hmdCalibrationPose.m[2][3] = packet.hmd.pz;
     
-    calibration.rightCalibrationPose.m[0][3] = packet.right_px;
-    calibration.rightCalibrationPose.m[1][3] = packet.right_py;
-    calibration.rightCalibrationPose.m[2][3] = packet.right_pz;
+    calibration.rightCalibrationPose.m[0][3] = packet.rightController.px;
+    calibration.rightCalibrationPose.m[1][3] = packet.rightController.py;
+    calibration.rightCalibrationPose.m[2][3] = packet.rightController.pz;
 }
 
 void VRManager::FinishCalibration() {

@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(mkdir:*)",
+      "Bash(rg:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(cp:*)",
+      "Bash(python3:*)",
+      "Bash(rmdir:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
