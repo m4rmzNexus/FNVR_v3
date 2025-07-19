@@ -25,7 +25,6 @@ set(SOURCES
     NVCSSkeleton.cpp
     FirstPersonBodyFix.cpp
     Globals.cpp
-    Core/Logging.cpp
 )
 
 # Create DLL
@@ -59,7 +58,7 @@ target_link_libraries(FNVR
     user32
 )
 
-# Install to game directory
-install(TARGETS FNVR 
-    RUNTIME DESTINATION "D:/SteamLibrary/steamapps/common/Fallout New Vegas/Data/NVSE/Plugins"
-)
+# Install to game directory (use CMAKE_INSTALL_PREFIX or copy manually)
+# install(TARGETS FNVR 
+#     RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Data/NVSE/Plugins"
+# )

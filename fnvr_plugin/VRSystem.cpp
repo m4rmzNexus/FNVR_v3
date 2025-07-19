@@ -107,20 +107,47 @@ HmdMatrix34_t VRManager::MultiplyMatrices(const HmdMatrix34_t& a, const HmdMatri
     return result;
 }
 
-// Koordinat dönüşümleri
-void VRManager::ConvertOpenVRToGamebryo(const HmdVector3_t& vrPos, HmdVector3_t& gamePos) {
-    // OpenVR: +Y up, +X right, -Z forward
-    // Gamebryo: +Z up, +X right, +Y forward
-    gamePos.v[0] = vrPos.v[0];  // X aynı
-    gamePos.v[1] = -vrPos.v[2]; // Y = -Z
-    gamePos.v[2] = vrPos.v[1];  // Z = Y
+// Coordinate system conversions
+void VRManager::ConvertOpenVRToGamebryo(const HmdVector3_t& vrPos, HmdVector3_t& gamePos, float scale) {
+    // OpenVR: Right-handed, +Y up, +X right, -Z forward (meters)
+    // Gamebryo: Left-handed, +Z up, +X right, +Y forward (game units)
+    // Verified from Gemini analysis and community testing
+    
+    gamePos.v[0] =  vrPos.v[0] * scale;  // X -> X (right stays right)
+    gamePos.v[1] = -vrPos.v[2] * scale;  // -Z -> Y (forward)
+    gamePos.v[2] =  vrPos.v[1] * scale;  // Y -> Z (up)
 }
 
-void VRManager::ConvertGamebryoToOpenVR(const HmdVector3_t& gamePos, HmdVector3_t& vrPos) {
-    // Ters dönüşüm
-    vrPos.v[0] = gamePos.v[0];  // X aynı
-    vrPos.v[1] = gamePos.v[2];  // Y = Z
-    vrPos.v[2] = -gamePos.v[1]; // Z = -Y
+void VRManager::ConvertGamebryoToOpenVR(const HmdVector3_t& gamePos, HmdVector3_t& vrPos, float scale) {
+    // Inverse transformation (rarely needed)
+    if (scale != 0.0f) {
+        vrPos.v[0] =  gamePos.v[0] / scale;  // X -> X
+        vrPos.v[1] =  gamePos.v[2] / scale;  // Z -> Y
+        vrPos.v[2] = -gamePos.v[1] / scale;  // Y -> -Z
+    }
+}
+
+// Quaternion conversion for rotations
+void VRManager::ConvertOpenVRQuaternionToGamebryo(const HmdQuaternion_t& vrQuat, HmdQuaternion_t& gameQuat) {
+    // OpenVR to Gamebryo requires a -90 degree rotation around X axis
+    // This is equivalent to pre-multiplying by quaternion (0.7071, -0.7071, 0, 0)
+    const float r_sqrt2_inv = 0.7071067811865476f; // 1/sqrt(2)
+    
+    gameQuat.w = (vrQuat.w + vrQuat.x) * r_sqrt2_inv;
+    gameQuat.x = (vrQuat.x - vrQuat.w) * r_sqrt2_inv;
+    gameQuat.y = (vrQuat.y + vrQuat.z) * r_sqrt2_inv;
+    gameQuat.z = (vrQuat.z - vrQuat.y) * r_sqrt2_inv;
+    
+    // Normalize to prevent drift
+    float mag = sqrtf(gameQuat.w*gameQuat.w + gameQuat.x*gameQuat.x + 
+                     gameQuat.y*gameQuat.y + gameQuat.z*gameQuat.z);
+    if (mag > 0.0f) {
+        float invMag = 1.0f / mag;
+        gameQuat.w *= invMag;
+        gameQuat.x *= invMag;
+        gameQuat.y *= invMag;
+        gameQuat.z *= invMag;
+    }
 }
 
 // VRManager implementasyonu

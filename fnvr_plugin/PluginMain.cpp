@@ -11,6 +11,7 @@
 #include <map>
 #include <chrono>
 #include <fstream>
+#include <cmath>
 
 // Include FNVR modules
 #include "VRDataPacket.h"
@@ -26,6 +27,7 @@
 #include "nvse/GameAPI.h"
 #include "nvse/GameObjects.h"
 #include "nvse/GameRTTI.h"
+#include "nvse/GameUI.h"
 
 // Forward declarations
 bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info);
@@ -44,10 +46,14 @@ static std::atomic<bool> g_shouldStop(false);
 static std::thread* g_pipeThread = nullptr;
 static std::thread* g_updateThread = nullptr;
 
-// VR Data
+// VR Data with thread safety
 static VRDataPacket g_currentVRData = {};
 static std::atomic<bool> g_hasNewData(false);
 static CRITICAL_SECTION g_dataLock;
+
+// Pipe connection state
+static bool g_isPipeConnected = false;
+static int g_pipeReconnectAttempts = 0;
 
 // Bone cache for performance
 struct BoneCache {
@@ -170,12 +176,19 @@ NiNode* FindBone(NiNode* root, const char* boneName) {
         return root;
     }
     
-    // Search children
-    for (UInt32 i = 0; i < root->m_children.m_size; i++) {
-        NiAVObject* child = root->m_children.m_data[i];
-        if (child && child->GetNiRTTI()->IsKindOf(NiRTTI_NiNode)) {
-            NiNode* found = FindBone(static_cast<NiNode*>(child), boneName);
-            if (found) return found;
+    // Search children with safety checks
+    if (root->m_children.m_data) {
+        for (UInt32 i = 0; i < root->m_children.m_size; i++) {
+            if (i >= root->m_children.m_uiMaxSize) {
+                Log("FindBone: Array bounds warning (i=%d, max=%d)", i, root->m_children.m_uiMaxSize);
+                break;
+            }
+            
+            NiAVObject* child = root->m_children.m_data[i];
+            if (child && child->GetNiRTTI() && child->GetNiRTTI()->IsKindOf(NiRTTI_NiNode)) {
+                NiNode* found = FindBone(static_cast<NiNode*>(child), boneName);
+                if (found) return found;
+            }
         }
     }
     
@@ -211,58 +224,166 @@ void BuildBoneCache(NiNode* root) {
     Log("Bone cache built with %d bones", g_boneCache.size());
 }
 
-// Pipe reading thread
+// Thread-safe pipe reading thread with error handling
 void PipeThreadFunc() {
     Log("Pipe thread started");
-    PipeClient pipeClient;
+    PipeClient pipeClient("\\\\.\\pipe\\FNVRTracker");
     
     while (!g_shouldStop) {
+        // Connection management with retry logic
         if (!pipeClient.IsConnected()) {
+            g_isPipeConnected = false;
+            
             if (!pipeClient.Connect()) {
-                Sleep(1000);
+                g_pipeReconnectAttempts++;
+                
+                // Log every 10 attempts to avoid spam
+                if (g_pipeReconnectAttempts % 10 == 1) {
+                    Log("Pipe connection attempt %d failed, retrying...", g_pipeReconnectAttempts);
+                }
+                
+                Sleep(1000); // Wait 1 second before retry
                 continue;
             }
-            Log("Pipe connected");
+            
+            // Connection successful
+            g_isPipeConnected = true;
+            g_pipeReconnectAttempts = 0;
+            Log("Pipe connected successfully");
         }
         
+        // Read data with error handling
         VRDataPacket data;
         if (pipeClient.Read(data)) {
-            EnterCriticalSection(&g_dataLock);
-            g_currentVRData = data;
-            g_hasNewData = true;
-            LeaveCriticalSection(&g_dataLock);
+            // Validate data before storing
+            bool dataValid = true;
+            
+            // Basic validation: check if quaternions are normalized
+            float hmdQLen = data.hmd_qw*data.hmd_qw + data.hmd_qx*data.hmd_qx + 
+                           data.hmd_qy*data.hmd_qy + data.hmd_qz*data.hmd_qz;
+            if (hmdQLen < 0.9f || hmdQLen > 1.1f) {
+                Log("Warning: Invalid HMD quaternion length: %.3f", hmdQLen);
+                dataValid = false;
+            }
+            
+            if (dataValid) {
+                // Thread-safe data update
+                EnterCriticalSection(&g_dataLock);
+                g_currentVRData = data;
+                g_hasNewData = true;
+                LeaveCriticalSection(&g_dataLock);
+            }
         } else {
+            // Read failed - connection lost
+            Log("Pipe read failed, disconnecting");
             pipeClient.Disconnect();
-            Sleep(100);
+            g_isPipeConnected = false;
+            Sleep(100); // Brief pause before reconnection attempt
         }
     }
     
+    // Cleanup
+    pipeClient.Disconnect();
+    g_isPipeConnected = false;
     Log("Pipe thread stopped");
 }
 
-// Apply VR data to skeleton
-void ApplyVRDataToSkeleton() {
-    PlayerCharacter* player = PlayerCharacter::GetSingleton();
-    if (!player) return;
+// Check if game is in a safe state for VR updates
+bool IsGameStateValid() {
+    // Check if we're in the main game world, not in menus or loading
     
-    // Get skeleton root
-    NiNode* skeletonRoot = nullptr;
-    if (!player->IsThirdPerson()) {
-        // First person
-        skeletonRoot = player->firstPerson->rootNode;
-    } else {
-        // Third person
-        skeletonRoot = player->niNode;
+    // Method 1: Check common menu states
+    InterfaceManager* im = InterfaceManager::GetSingleton();
+    if (!im) {
+        Log("Game state check: InterfaceManager not available");
+        return false;
     }
     
-    if (!skeletonRoot) return;
+    // Check for main menu
+    if (im->menuMode) {
+        Log("Game state check: Menu mode active (menuMode=%d)", im->menuMode);
+        return false;
+    }
+    
+    // Additional safety: check if any menu is open
+    if (im->activeMenu) {
+        Log("Game state check: Active menu detected");
+        return false;
+    }
+    
+    // Check console state
+    if (ConsoleManager::GetSingleton() && ConsoleManager::GetSingleton()->IsConsoleOpen()) {
+        Log("Game state check: Console is open");
+        return false;
+    }
+    
+    return true;
+}
+
+// Apply VR data to skeleton with comprehensive safety checks
+void ApplyVRDataToSkeleton() {
+    // === STAGE 1: Game State Validation ===
+    if (!IsGameStateValid()) {
+        return; // Not safe to update
+    }
+    
+    // === STAGE 2: Player Validation ===
+    PlayerCharacter* player = PlayerCharacter::GetSingleton();
+    if (!player) {
+        Log("Safety check failed: player is null");
+        return;
+    }
+    
+    // Check if player is dead
+    if (player->GetDead()) {
+        Log("Safety check: player is dead, skipping updates");
+        return;
+    }
+    
+    // Check if player has a valid parent cell (is in world)
+    if (!player->parentCell) {
+        Log("Safety check failed: player has no parent cell");
+        return;
+    }
+    
+    // Check if player has process data
+    if (!player->process) {
+        Log("Safety check failed: player->process is null");
+        return;
+    }
+    
+    // === STAGE 3: Get Skeleton Root with Safety ===
+    NiNode* skeletonRoot = nullptr;
+    
+    if (!player->IsThirdPerson()) {
+        // First person - check if firstPerson exists
+        if (player->firstPerson && player->firstPerson->rootNode) {
+            skeletonRoot = player->firstPerson->rootNode;
+        } else {
+            Log("Safety check: firstPerson or its rootNode is null");
+            return;
+        }
+    } else {
+        // Third person
+        if (player->niNode) {
+            skeletonRoot = player->niNode;
+        } else {
+            Log("Safety check: player->niNode is null");
+            return;
+        }
+    }
+    
+    if (!skeletonRoot) {
+        Log("Safety check failed: skeletonRoot is null after checks");
+        return;
+    }
     
     // Ensure bone cache is valid
     if (!g_boneCacheValid) {
         BuildBoneCache(skeletonRoot);
     }
     
-    // Copy VR data
+    // === STAGE 4: Copy VR Data Thread-Safely ===
     VRDataPacket vrData;
     bool hasData = false;
     
@@ -271,53 +392,172 @@ void ApplyVRDataToSkeleton() {
         vrData = g_currentVRData;
         hasData = true;
         g_hasNewData = false;
+        
+        // Debug: Log data reception occasionally
+        static int dataFrameCount = 0;
+        if (++dataFrameCount % 300 == 0) { // Every 5 seconds at 60fps
+            Log("VR data received: HMD pos(%.2f,%.2f,%.2f) rot(%.2f,%.2f,%.2f,%.2f)",
+                vrData.hmd_px, vrData.hmd_py, vrData.hmd_pz,
+                vrData.hmd_qw, vrData.hmd_qx, vrData.hmd_qy, vrData.hmd_qz);
+        }
     }
     LeaveCriticalSection(&g_dataLock);
     
-    if (!hasData) return;
+    if (!hasData) {
+        static int noDataCount = 0;
+        if (++noDataCount % 600 == 0) { // Log every 10 seconds
+            Log("Warning: No new VR data available (pipe connected: %s)", 
+                g_isPipeConnected ? "yes" : "no");
+        }
+        return;
+    }
     
-    // Apply head tracking
+    // Apply head tracking with safety checks
     if (g_enableHeadTracking) {
         NiNode* headBone = FindBone(skeletonRoot, "Bip01 Head");
-        if (headBone) {
-            // Convert VR coordinates to game coordinates
-            float gameX = vrData.hmd_pos.x * g_positionScale;
-            float gameY = -vrData.hmd_pos.z * g_positionScale; // VR Z -> Game -Y
-            float gameZ = vrData.hmd_pos.y * g_positionScale;  // VR Y -> Game Z
+        if (!headBone) {
+            Log("Warning: Could not find Bip01 Head bone");
+        } else {
+            // Additional validation before modifying
+            if (!headBone->m_parent) {
+                Log("Warning: Head bone has no parent, skipping");
+                return;
+            }
+            // Convert VR coordinates to game coordinates using proper transformation
+            // OpenVR: Right-handed, Y-up, -Z forward (meters)
+            // Gamebryo: Left-handed, Z-up, Y forward (game units)
             
-            // Apply position
-            headBone->m_localTransform.pos.x = gameX;
-            headBone->m_localTransform.pos.y = gameY;
-            headBone->m_localTransform.pos.z = gameZ;
+            // Position conversion
+            float gameX =  vrData.hmd_px * g_positionScale;  // X -> X
+            float gameY = -vrData.hmd_pz * g_positionScale;  // -Z -> Y
+            float gameZ =  vrData.hmd_py * g_positionScale;  // Y -> Z
             
-            // Apply rotation (quaternion to matrix)
-            // TODO: Implement quaternion to matrix conversion
+            // Apply position offsets from config
+            headBone->m_localTransform.pos.x = gameX + g_positionOffsetX;
+            headBone->m_localTransform.pos.y = gameY + g_positionOffsetY;
+            headBone->m_localTransform.pos.z = gameZ + g_positionOffsetZ;
+            
+            // Quaternion conversion for rotation
+            // OpenVR to Gamebryo requires -90 degree rotation around X axis
+            const float r_sqrt2_inv = 0.7071067811865476f; // 1/sqrt(2)
+            
+            float game_qw = (vrData.hmd_qw + vrData.hmd_qx) * r_sqrt2_inv;
+            float game_qx = (vrData.hmd_qx - vrData.hmd_qw) * r_sqrt2_inv;
+            float game_qy = (vrData.hmd_qy + vrData.hmd_qz) * r_sqrt2_inv;
+            float game_qz = (vrData.hmd_qz - vrData.hmd_qy) * r_sqrt2_inv;
+            
+            // Normalize quaternion
+            float mag = sqrtf(game_qw*game_qw + game_qx*game_qx + game_qy*game_qy + game_qz*game_qz);
+            if (mag > 0.0f) {
+                float invMag = 1.0f / mag;
+                game_qw *= invMag;
+                game_qx *= invMag;
+                game_qy *= invMag;
+                game_qz *= invMag;
+            }
+            
+            // Convert quaternion to rotation matrix for NiTransform
+            // Using standard quaternion to matrix conversion
+            float xx = game_qx * game_qx;
+            float yy = game_qy * game_qy;
+            float zz = game_qz * game_qz;
+            float xy = game_qx * game_qy;
+            float xz = game_qx * game_qz;
+            float yz = game_qy * game_qz;
+            float wx = game_qw * game_qx;
+            float wy = game_qw * game_qy;
+            float wz = game_qw * game_qz;
+            
+            headBone->m_localTransform.rot.data[0][0] = 1.0f - 2.0f * (yy + zz);
+            headBone->m_localTransform.rot.data[0][1] = 2.0f * (xy - wz);
+            headBone->m_localTransform.rot.data[0][2] = 2.0f * (xz + wy);
+            
+            headBone->m_localTransform.rot.data[1][0] = 2.0f * (xy + wz);
+            headBone->m_localTransform.rot.data[1][1] = 1.0f - 2.0f * (xx + zz);
+            headBone->m_localTransform.rot.data[1][2] = 2.0f * (yz - wx);
+            
+            headBone->m_localTransform.rot.data[2][0] = 2.0f * (xz - wy);
+            headBone->m_localTransform.rot.data[2][1] = 2.0f * (yz + wx);
+            headBone->m_localTransform.rot.data[2][2] = 1.0f - 2.0f * (xx + yy);
             
             // Update transforms
             headBone->Update(0.0f);
         }
     }
     
-    // Apply hand tracking
+    // Apply hand tracking with safety checks
     if (g_enableHandTracking) {
-        // Right hand
+        // Right hand with comprehensive validation
         NiNode* rightHand = FindBone(skeletonRoot, "Bip01 R Hand");
-        if (rightHand) {
-            float gameX = vrData.controller_pos.x * g_positionScale;
-            float gameY = -vrData.controller_pos.z * g_positionScale;
-            float gameZ = vrData.controller_pos.y * g_positionScale;
+        if (!rightHand) {
+            Log("Warning: Could not find Bip01 R Hand bone");
+        } else {
+            // Validate bone before manipulation
+            if (!rightHand->m_parent) {
+                Log("Warning: Right hand bone has no parent, skipping");
+                return;
+            }
+            // Convert VR controller coordinates to game coordinates
+            // Same transformation as HMD
+            float gameX =  vrData.right_px * g_positionScale;  // X -> X
+            float gameY = -vrData.right_pz * g_positionScale;  // -Z -> Y
+            float gameZ =  vrData.right_py * g_positionScale;  // Y -> Z
             
-            rightHand->m_localTransform.pos.x = gameX;
-            rightHand->m_localTransform.pos.y = gameY;
-            rightHand->m_localTransform.pos.z = gameZ;
+            // Apply position with offsets
+            rightHand->m_localTransform.pos.x = gameX + g_handOffsetX;
+            rightHand->m_localTransform.pos.y = gameY + g_handOffsetY;
+            rightHand->m_localTransform.pos.z = gameZ + g_handOffsetZ;
+            
+            // Quaternion conversion for rotation
+            const float r_sqrt2_inv = 0.7071067811865476f;
+            
+            float game_qw = (vrData.right_qw + vrData.right_qx) * r_sqrt2_inv;
+            float game_qx = (vrData.right_qx - vrData.right_qw) * r_sqrt2_inv;
+            float game_qy = (vrData.right_qy + vrData.right_qz) * r_sqrt2_inv;
+            float game_qz = (vrData.right_qz - vrData.right_qy) * r_sqrt2_inv;
+            
+            // Normalize
+            float mag = sqrtf(game_qw*game_qw + game_qx*game_qx + game_qy*game_qy + game_qz*game_qz);
+            if (mag > 0.0f) {
+                float invMag = 1.0f / mag;
+                game_qw *= invMag;
+                game_qx *= invMag;
+                game_qy *= invMag;
+                game_qz *= invMag;
+            }
+            
+            // Convert quaternion to rotation matrix
+            float xx = game_qx * game_qx;
+            float yy = game_qy * game_qy;
+            float zz = game_qz * game_qz;
+            float xy = game_qx * game_qy;
+            float xz = game_qx * game_qz;
+            float yz = game_qy * game_qz;
+            float wx = game_qw * game_qx;
+            float wy = game_qw * game_qy;
+            float wz = game_qw * game_qz;
+            
+            rightHand->m_localTransform.rot.data[0][0] = 1.0f - 2.0f * (yy + zz);
+            rightHand->m_localTransform.rot.data[0][1] = 2.0f * (xy - wz);
+            rightHand->m_localTransform.rot.data[0][2] = 2.0f * (xz + wy);
+            
+            rightHand->m_localTransform.rot.data[1][0] = 2.0f * (xy + wz);
+            rightHand->m_localTransform.rot.data[1][1] = 1.0f - 2.0f * (xx + zz);
+            rightHand->m_localTransform.rot.data[1][2] = 2.0f * (yz - wx);
+            
+            rightHand->m_localTransform.rot.data[2][0] = 2.0f * (xz - wy);
+            rightHand->m_localTransform.rot.data[2][1] = 2.0f * (yz + wx);
+            rightHand->m_localTransform.rot.data[2][2] = 1.0f - 2.0f * (xx + yy);
             
             rightHand->Update(0.0f);
         }
         
-        // Update weapon node if exists
+        // Update weapon node with safety check
         NiNode* weaponNode = FindBone(skeletonRoot, "Weapon");
-        if (weaponNode) {
+        if (weaponNode && weaponNode->m_parent) {
             weaponNode->Update(0.0f);
+        } else if (weaponNode) {
+            Log("Warning: Weapon node exists but has no parent");
         }
     }
     

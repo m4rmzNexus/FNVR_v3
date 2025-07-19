@@ -2,8 +2,7 @@
 
 #include <windows.h>
 #include <string>
-#include "VRDataPacket.h" // For VRDataPacket
-#include "VRDataPacketV2.h" // For VRDataPacketV2
+#include "VRDataPacket.h" // Includes both VRDataPacketV2 and VRDataPacket definitions
 
 class PipeClient
 {

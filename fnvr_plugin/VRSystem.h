@@ -12,9 +12,12 @@ struct HmdVector2_t {
     float v[2];
 };
 
-struct HmdQuaternionf_t {
+struct HmdQuaternion_t {
     float w, x, y, z;
 };
+
+// Keep alias for compatibility
+typedef HmdQuaternion_t HmdQuaternionf_t;
 
 struct HmdMatrix34_t {
     float m[3][4];
@@ -142,9 +145,10 @@ private:
     HmdMatrix34_t QuaternionToMatrix(const HmdQuaternionf_t& quat);
     HmdMatrix34_t MultiplyMatrices(const HmdMatrix34_t& a, const HmdMatrix34_t& b);
     
-    // Bethesda koordinat dönüşümleri
-    void ConvertOpenVRToGamebryo(const HmdVector3_t& vrPos, HmdVector3_t& gamePos);
-    void ConvertGamebryoToOpenVR(const HmdVector3_t& gamePos, HmdVector3_t& vrPos);
+    // Coordinate system conversions (OpenVR <-> Gamebryo)
+    void ConvertOpenVRToGamebryo(const HmdVector3_t& vrPos, HmdVector3_t& gamePos, float scale = 70.0f);
+    void ConvertGamebryoToOpenVR(const HmdVector3_t& gamePos, HmdVector3_t& vrPos, float scale = 70.0f);
+    void ConvertOpenVRQuaternionToGamebryo(const HmdQuaternion_t& vrQuat, HmdQuaternion_t& gameQuat);
 };
 
 // Bethesda tarzı VR Input sistemi

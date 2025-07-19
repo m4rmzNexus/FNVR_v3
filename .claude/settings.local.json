@@ -12,7 +12,8 @@
       "Bash(cp:*)",
       "Bash(python3:*)",
       "Bash(rmdir:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }
